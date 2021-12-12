@@ -190,3 +190,32 @@ To create a randomized string use crypto in Node (terminal)
 `> require('crypto')`
 `> crypto.randomBytes(32).toString('hex')` // this will create a rondomized 32 bytes using hex decimal
 example output:'282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888'
+
+## Create JWT utils file
+
+- Create 'utils' in the src directory
+- Touch 'jwt-utils.js'
+
+```javascript
+import jwt from 'jsonwebtoken';
+import environment from '../config/environment'
+
+export default class JWTUtils {
+  static generateAccessToken(payload, options = {}) {
+    const { expiresIn = '1d' } = options;
+    return jwt.sign(payload, environment.jwtAccessTokenSecret, {expiresIn});
+  }
+
+  static generateRefreshToken(payload) {
+    return jwt.sign(payload, environment.jwtRefreshTokenSecret);
+  }
+
+  static verifyAccessToken(accessToken) {
+    return jwt.verify(accessToken, environment.jwtAccessTokenSecret)
+  }
+
+  static verifyRefreshToken(accessToken) {
+    return jwt.verify(accessToken, environment.jwtRefreshTokenSecret)
+  }
+}
+```
