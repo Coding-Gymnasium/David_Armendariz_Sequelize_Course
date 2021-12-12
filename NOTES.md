@@ -139,3 +139,54 @@ Repeat steps to create 'sequelize_course_test'
 
 
 `postgres=# \list`
+
+## Create config directory
+
+1.Create 'index.js'
+
+```javascript
+  import dotenv from 'dotenv';
+
+  dotenv.config();
+```
+
+2.Create 'database.js'
+
+```javascript
+module.exports = {
+  development: {
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 9876,
+    database: process.env.DB_DATABASE || 'postgres',
+    dialect: 'postgres',
+  }, test: {
+    username: process.env.DB_TEST_USERNAME || 'postgres',
+    password: process.env.DB_TEST_PASSWORD || 'postgres',
+    host: process.env.DB_TEST_HOST || 'localhost',
+    port: parseInt(process.env.DB_TEST_PORT) || 8765,
+    database: process.env.DB_TEST_DATABASE || 'postgres',
+    dialect: 'postgres',
+  },
+}
+```
+
+3.Create 'environment'
+
+```javascript
+export default {
+  port: parseInt(process.env.PORT) || 8080,
+  nodeEnv: process.env.NODE_ENV || 'production',
+  saltRounds: parseInt(process.env.SALT_ROUNDS) || 10,
+  jwtAccessTokenSecret: process.env.JWT_ACCESS_TOKEN_SECRET || '282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888',
+  jwtRefreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET || '6a886c8fcc7b7f8b9bf44c7065e5e961f4b668fe56f8ca51991051d103c8eba0'
+}
+```
+
+To create a randomized string use crypto in Node (terminal)
+
+`$ node`
+`> require('crypto')`
+`> crypto.randomBytes(32).toString('hex')` // this will create a rondomized 32 bytes using hex decimal
+example output:'282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888'
