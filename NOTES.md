@@ -74,13 +74,24 @@
     "start": "node dist/server.js",
     "dev": "NODE_ENV=development nodemon --exec babel-node src/server.js",
     "debug": "npm run dev -- --inspect",
-    "test": "jest --runinBand",
-    "testwatch": "npm test -- --watch",
+    "test": "jest --runInBand",
+    "test:watch": "npm test -- --watch",
     "testcoverage": "npm test -- --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cls-hooked": "^4.2.2",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "pg": "^8.7.1",
+    "sequelize": "^6.12.0-beta.2",
+    "sequelize-cli": "^6.3.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
@@ -92,6 +103,7 @@
     "supertest": "^6.1.6"
   }
 }
+
 ```
 
 9.Docker-compose.yaml file
@@ -219,3 +231,51 @@ export default class JWTUtils {
   }
 }
 ```
+
+
+## Create Tests Directory
+
+- Create directory 'tests' in root
+- Create directory 'utils' in 'tests'
+- Create test file 'jwt-utils.test.js'
+
+```javascript
+import jwt from 'jsonwebtoken';
+import JWTUtils from '../../src/utils/jwt-utils';
+
+describe('jwt utils', () => {
+  it('should return and access toke', () => {
+    const payload = {email: 'test@example.com'} 
+    expect(JWTUtils.generateAccessToken( payload )).toEqual(expect.any(String));
+  }); 
+
+  it('should return and refresh toke', () => {
+    const payload = {email: 'test@example.com'} 
+    expect(JWTUtils.generateRefreshToken( payload )).toEqual(expect.any(String));
+  }); 
+
+   it('should verify that the access token is valid', () => {
+   const payload = {email: 'test@example.com'} 
+    const jwt = JWTUtils.generateAccessToken(payload)  
+    expect(JWTUtils.verifyAccessToken(jwt)).toEqual(expect.objectContaining(payload))
+  });
+
+  it('should verify that the refresh token is valid', () => {
+   const payload = {email: 'test@example.com'} 
+    const jwt = JWTUtils.generateRefreshToken(payload)  
+    expect(JWTUtils.verifyRefreshToken(jwt)).toEqual(expect.objectContaining(payload))
+  });
+
+  it('should error if the access token is invalid', () => {
+    expect(() => JWTUtils.verifyAccessToken('invalid token')).toThrow(JsonWebTokenError); 
+  });
+
+  it('should error if the refresh token is invalid', () => {
+    expect(() => JWTUtils.verifyRefreshToken('invalid token')).toThrow(JsonWebTokenError); 
+  });
+});
+```
+
+Run tests
+`npm run test:watch`
+
