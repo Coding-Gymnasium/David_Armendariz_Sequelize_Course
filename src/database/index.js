@@ -15,11 +15,21 @@ export default class Database {
     Sequelize.useCLS(namespace);
 
     // Create the connection
-    const {username, password, host, port, database, dialect} = this.dbConfig(this.environment)
-    this.connection = new Sequelize({ username, password, host, port, database, dialect, logging: this.isTestEnviroment ? false : console.log })
+    const {username, password, host, port, database, dialect} = this.dbConfig[this.environment];
+    this.connection = new Sequelize({ 
+      username, 
+      password, 
+      host,
+      port, 
+      database, 
+      dialect, 
+      logging: this.isTestEnviroment ? false : console.log,
+    });
+
     // Check if we connected succesfully
     await this.connection.authenticate({ logging: false });
-    if(this.isTestEnviroment){
+
+    if(!this.isTestEnviroment){
       console.log('Connection to the database has been established successfully');
     }
 
