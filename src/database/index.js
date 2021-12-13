@@ -1,5 +1,6 @@
 import cls from "cls-hooked";
 import {Sequelize} from "sequelize/dist";
+import {registerModels} from "../models";
 
 export default class Database {
   constructor(environment, dbConfig) {
@@ -46,3 +47,4 @@ export default class Database {
     }
   }
 }
+
