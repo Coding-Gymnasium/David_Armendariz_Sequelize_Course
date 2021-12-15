@@ -9,7 +9,9 @@ import dbConfig from './config/database';
     const db = new Database(environment.nodeEnv, dbConfig);
     await db.connect();
   } catch (err) {
-    console.error('Something went wrong when initializing the server:\n', err.stack);
+    console.error(
+      'Something went wrong when initializing the server:\n',
+      err.stack,
+    );
   }
 })();
-

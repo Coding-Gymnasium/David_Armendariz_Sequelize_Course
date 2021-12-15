@@ -19,16 +19,16 @@
 
 ```gitignore
   # Node Modules
-  
+
   /node_modules
-  
+
   # Coverage
-  
+
   /coverage
-  
+
   # Environment Variables
   .env
-  
+
   /dist
 
 ```
@@ -37,29 +37,25 @@
 `$ npm install bcrypt sequelize sequelize-cli jsonwebtoken pg express dotenv morgan cls-hooked`
 
 5.Install development dependencies
-  `$ npm install -D @babel/cli @babel/core @babel/node @babel/preset-env jest @types/jest supertest nodemon`
+`$ npm install -D @babel/cli @babel/core @babel/node @babel/preset-env jest @types/jest supertest nodemon`
 
 6.Configure Babel
-  `$ touch babel.config.js`
+`$ touch babel.config.js`
 
-  ```javascript
-    module.exports = {
-      presets: [
-        ['@babel/preset-env', 
-          {targets: {node: 'current'}}
-        ]
-      ]
-    }
-  ```
+```javascript
+module.exports = {
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
+};
+```
 
 7.Configure Jest
-  `$ touch jest.config.js`
+`$ touch jest.config.js`
 
-  ```javascript
-    module.exports = {
-      testEnvironment: 'node'
-    }
-  ```
+```javascript
+module.exports = {
+  testEnvironment: 'node',
+};
+```
 
 8.Setup scripts in package.json
 
@@ -103,7 +99,6 @@
     "supertest": "^6.1.6"
   }
 }
-
 ```
 
 9.Docker-compose.yaml file
@@ -130,7 +125,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${DB_TEST_PASSWORD:-postgres}
     ports:
-      - ${DB_TEST_PORT:-8765}:9876
+      - ${DB_TEST_PORT:-5434}:5432
 ```
 
 Run
@@ -139,16 +134,12 @@ Run
 
 10.Create database
 
-Login as user nicorithner
+Login as user postgres
 This user already has permissions to create a database
 
-`postgres=# psql -d postgres -U nicorithner`
-
 Create database
-`postgres=# CREATE DATABASE sequelize_course;`
-
-Repeat steps to create 'sequelize_course_test'
-
+`postgres=# CREATE DATABASE sequelize_course_db OWNER postgres;`
+`postgres=# CREATE DATABASE sequelize_course_test_db OWNER postgres;`
 
 `postgres=# \list`
 
@@ -157,9 +148,9 @@ Repeat steps to create 'sequelize_course_test'
 1.Create 'index.js'
 
 ```javascript
-  import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 
-  dotenv.config();
+dotenv.config();
 ```
 
 2.Create 'database.js'
@@ -173,7 +164,8 @@ module.exports = {
     port: parseInt(process.env.DB_PORT) || 9876,
     database: process.env.DB_DATABASE || 'postgres',
     dialect: 'postgres',
-  }, test: {
+  },
+  test: {
     username: process.env.DB_TEST_USERNAME || 'postgres',
     password: process.env.DB_TEST_PASSWORD || 'postgres',
     host: process.env.DB_TEST_HOST || 'localhost',
@@ -181,7 +173,7 @@ module.exports = {
     database: process.env.DB_TEST_DATABASE || 'postgres',
     dialect: 'postgres',
   },
-}
+};
 ```
 
 3.Create 'environment'
@@ -191,9 +183,13 @@ export default {
   port: parseInt(process.env.PORT) || 8080,
   nodeEnv: process.env.NODE_ENV || 'production',
   saltRounds: parseInt(process.env.SALT_ROUNDS) || 10,
-  jwtAccessTokenSecret: process.env.JWT_ACCESS_TOKEN_SECRET || '282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888',
-  jwtRefreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET || '6a886c8fcc7b7f8b9bf44c7065e5e961f4b668fe56f8ca51991051d103c8eba0'
-}
+  jwtAccessTokenSecret:
+    process.env.JWT_ACCESS_TOKEN_SECRET ||
+    '282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888',
+  jwtRefreshTokenSecret:
+    process.env.JWT_REFRESH_TOKEN_SECRET ||
+    '6a886c8fcc7b7f8b9bf44c7065e5e961f4b668fe56f8ca51991051d103c8eba0',
+};
 ```
 
 To create a randomized string use crypto in Node (terminal)
@@ -210,12 +206,12 @@ example output:'282d838319a822fbe4b2314a59c511eab0b151ccf52912ea24ff6875fcd1a888
 
 ```javascript
 import jwt from 'jsonwebtoken';
-import environment from '../config/environment'
+import environment from '../config/environment';
 
 export default class JWTUtils {
   static generateAccessToken(payload, options = {}) {
     const { expiresIn = '1d' } = options;
-    return jwt.sign(payload, environment.jwtAccessTokenSecret, {expiresIn});
+    return jwt.sign(payload, environment.jwtAccessTokenSecret, { expiresIn });
   }
 
   static generateRefreshToken(payload) {
@@ -223,11 +219,11 @@ export default class JWTUtils {
   }
 
   static verifyAccessToken(accessToken) {
-    return jwt.verify(accessToken, environment.jwtAccessTokenSecret)
+    return jwt.verify(accessToken, environment.jwtAccessTokenSecret);
   }
 
   static verifyRefreshToken(accessToken) {
-    return jwt.verify(accessToken, environment.jwtRefreshTokenSecret)
+    return jwt.verify(accessToken, environment.jwtRefreshTokenSecret);
   }
 }
 ```
@@ -244,33 +240,41 @@ import JWTUtils from '../../src/utils/jwt-utils';
 
 describe('jwt utils', () => {
   it('should return and access toke', () => {
-    const payload = {email: 'test@example.com'} 
-    expect(JWTUtils.generateAccessToken( payload )).toEqual(expect.any(String));
-  }); 
+    const payload = { email: 'test@example.com' };
+    expect(JWTUtils.generateAccessToken(payload)).toEqual(expect.any(String));
+  });
 
   it('should return and refresh toke', () => {
-    const payload = {email: 'test@example.com'} 
-    expect(JWTUtils.generateRefreshToken( payload )).toEqual(expect.any(String));
-  }); 
+    const payload = { email: 'test@example.com' };
+    expect(JWTUtils.generateRefreshToken(payload)).toEqual(expect.any(String));
+  });
 
-   it('should verify that the access token is valid', () => {
-   const payload = {email: 'test@example.com'} 
-    const jwt = JWTUtils.generateAccessToken(payload)  
-    expect(JWTUtils.verifyAccessToken(jwt)).toEqual(expect.objectContaining(payload))
+  it('should verify that the access token is valid', () => {
+    const payload = { email: 'test@example.com' };
+    const jwt = JWTUtils.generateAccessToken(payload);
+    expect(JWTUtils.verifyAccessToken(jwt)).toEqual(
+      expect.objectContaining(payload),
+    );
   });
 
   it('should verify that the refresh token is valid', () => {
-   const payload = {email: 'test@example.com'} 
-    const jwt = JWTUtils.generateRefreshToken(payload)  
-    expect(JWTUtils.verifyRefreshToken(jwt)).toEqual(expect.objectContaining(payload))
+    const payload = { email: 'test@example.com' };
+    const jwt = JWTUtils.generateRefreshToken(payload);
+    expect(JWTUtils.verifyRefreshToken(jwt)).toEqual(
+      expect.objectContaining(payload),
+    );
   });
 
   it('should error if the access token is invalid', () => {
-    expect(() => JWTUtils.verifyAccessToken('invalid token')).toThrow(JsonWebTokenError); 
+    expect(() => JWTUtils.verifyAccessToken('invalid token')).toThrow(
+      JsonWebTokenError,
+    );
   });
 
   it('should error if the refresh token is invalid', () => {
-    expect(() => JWTUtils.verifyRefreshToken('invalid token')).toThrow(JsonWebTokenError); 
+    expect(() => JWTUtils.verifyRefreshToken('invalid token')).toThrow(
+      JsonWebTokenError,
+    );
   });
 });
 ```
@@ -294,7 +298,7 @@ export default class Database {
     this.dbConfig = dbConfig;
     this.isTestEnviroment = this.environment === 'test';
 
-  } 
+  }
   async connect() {
     // set up namespace for transactions
     const namespace = cls.createNamespace('transactions namespace');
@@ -384,12 +388,11 @@ import dbConfig from './config/database';
     const db = new Database(environment.nodeEnv, dbConfig);
     await db.connect();
   } catch (err) {
-    console.error('Something went wrong when initializing the server:\n', err.stack);
+    console.error(
+      'Something went wrong when initializing the server:\n',
+      err.stack,
+    );
   }
 })();
 ```
-
-
-
-
 
